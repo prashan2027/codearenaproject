@@ -24,7 +24,7 @@ public class AdminProblemService {
 
     private final ProblemRepository problemRepository;
 
-    public void addproblem(ProblemRequestDto requestDto) {
+    public ProblemResponseDto addproblem(ProblemRequestDto requestDto) {
         try {
             Problem problem = ProblemMapper.toproblem(requestDto);
 
@@ -43,8 +43,8 @@ public class AdminProblemService {
                 testcases.add(testcase);
             }
             problem.setTestCases(testcases);
-            problemRepository.save(problem);
-
+          Problem p=  problemRepository.save(problem);
+    return ProblemMapper.todto(problem);
 
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
@@ -87,26 +87,52 @@ public class AdminProblemService {
         }
     }
 
-    public ProblemResponseDto updateproblem(Long id,ProblemRequestDto requestDto){
-                try {
-                    Problem problem=problemRepository.findById(id).orElseThrow(()->new RuntimeException("Problem not found"));
-                    problem.setTitle(requestDto.getTitle());
-                    problem.setDescription(requestDto.getDescription());
-                    problem.setDifficulty(requestDto.getDifficulty());
-                    problem.setCompany(requestDto.getCompany());
-                    problem.setInputformat(requestDto.getInputformat());
-                    problem.setOutputformat(requestDto.getOutputformat());
-                    problem.setConstraints(requestDto.getConstraints());
-                    problem.setCreatedat(new Date());
-                    problem.setTags(requestDto.getTags());
-                    problemRepository.save(problem);
-                    return ProblemMapper.todto(problem);
-                }catch (Exception e){
-                    throw new RuntimeException(e.getMessage());
-                }
+    public ProblemResponseDto updateproblem(Long id, ProblemRequestDto requestDto) {
+        try {
+            Problem problem = problemRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Problem not found"));
 
+            // Update problem fields
+            problem.setTitle(requestDto.getTitle());
+            problem.setDescription(requestDto.getDescription());
+            problem.setDifficulty(requestDto.getDifficulty());
+            problem.setCompany(requestDto.getCompany());
+            problem.setInputformat(requestDto.getInputformat());
+            problem.setOutputformat(requestDto.getOutputformat());
+            problem.setConstraints(requestDto.getConstraints());
+            problem.setCreatedat(new Date());
+            problem.setTags(requestDto.getTags());
 
+            // 🔥 Clear existing testcases (Hibernate deletes orphans automatically)
+            problem.getTestCases().clear();
+
+            List<TestCase> newCases = new ArrayList<>();
+
+            int serial = 1;
+            for (TestCaseDto dto : requestDto.getTestcases()) {
+                TestCase t = new TestCase();
+                t.setProblem(problem);
+                t.setInput(dto.getInput());
+                t.setOutput(dto.getOutput());
+                t.setHidden(dto.getIshidden());
+                t.setExpectedError("False");
+                t.setSerialNumber(serial++);
+                t.setCreatedAt(LocalDateTime.now());
+                newCases.add(t);
+            }
+
+            // assign fresh testcases
+            problem.getTestCases().addAll(newCases);
+
+            problemRepository.save(problem);
+
+            return ProblemMapper.todto(problem);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
+
 
 
 

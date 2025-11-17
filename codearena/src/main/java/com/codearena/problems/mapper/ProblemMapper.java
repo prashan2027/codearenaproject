@@ -23,7 +23,7 @@ public class ProblemMapper {
         dto.setConstraints(problem.getConstraints());
         dto.setCompany(problem.getCompany());
         dto.setTags(problem.getTags());
-
+        dto.setTestcases(problem.getTestCases().stream().map(ProblemMapper::totestcasedto).toList());
         return dto;
     }
 
@@ -48,4 +48,14 @@ public class ProblemMapper {
         dto.setIshidden(testCase.getHidden());
         return dto;
     }
+
+    public static TestCase totestcase(TestCaseDto dto,Problem problem){
+        TestCase testcase=new TestCase();
+        testcase.setInput(dto.getInput());
+        testcase.setOutput(dto.getOutput());
+        testcase.setHidden(dto.getIshidden());
+        testcase.setProblem(problem);
+        return testcase;
+    }
+
 }
