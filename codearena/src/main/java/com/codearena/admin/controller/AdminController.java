@@ -9,33 +9,38 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
 public class AdminController {
 
+    private final ProblemService problemService;
+
 //    # 1. add new problems
     @PostMapping("/addproblem")
     public ResponseEntity<Void> addproblem(@RequestBody ProblemRequestDto problem){
-
+        problemService.addproblem(problem);
+        return ResponseEntity.ok().build();
     }
 //    # 2. get problem lists
     @GetMapping("/getproblems")
-    public ResponseEntity<ProblemListDto> getproblemList(){
-
+    public ResponseEntity<List<ProblemListDto>> getproblemList(){
+     return ResponseEntity.ok(problemService.getproblemlist());
     }
 
 //    # 3. get the problem by id
     @GetMapping("/problem/{id}")
     public ResponseEntity<ProblemResponseDto> getproblem(@PathVariable Long id){
-
+      return ResponseEntity.ok(problemService.getproblem(id));
     }
 
 //    # 4. delete problem by id
     @DeleteMapping("/deleteproblem/{id}")
-    public ResponseEntity<Void> deleteproblem(@PathVariable Long id){
-
-
+    public ResponseEntity<?> deleteproblem(@PathVariable Long id){
+       problemService.deleteProblem(id);
+       return ResponseEntity.ok().build();
     }
 
 //    # 5. update problem by id
@@ -44,9 +49,8 @@ public class AdminController {
 
     }
 
+//    update the test cases by problem id;
 
-
-
-
+//    public ResponseEntity<?> updatetestcase(@RequestBody )
 
 }
